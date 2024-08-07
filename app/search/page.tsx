@@ -97,7 +97,7 @@ const SearchPage = (props: Props) => {
           />
         </div>
         <div className="h-12 flex flex-col justify-center">
-          <TbCirclesRelation size={32} />
+          <TbCirclesRelation size={32} color="white" />
         </div>
         <div className="h-12 w-full bg-slate-200 rounded-lg flex place-content-center">
           <input
