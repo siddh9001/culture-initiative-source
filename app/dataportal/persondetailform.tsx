@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import { useEffect } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -19,8 +19,35 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 
 const FormSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+  personname: z.string().min(2, {
+    message: "name must be at least 2 characters.",
+  }),
+  personsurname: z.string().min(2, {
+    message: "name must be at least 2 characters.",
+  }),
+  personmodifiedname: z.string().min(2, {
+    message: "modified name must be at least 2 characters.",
+  }),
+  persongender: z.string().regex(new RegExp(/^[MF]$/), {
+    message: "Only M(male)/F(female) is allowed.",
+  }),
+  persondob: z.string().min(2, {
+    message: "dob must be in dd/mm/yyyy.",
+  }),
+  personDAstatus: z.string().regex(new RegExp(/^[DA]$/), {
+    message: "Only D(Dead)/A(Alive) is allowed",
+  }),
+  personlocation: z.string().min(2, {
+    message: "Only String allowed",
+  }),
+  personmayka: z.string().min(2, {
+    message: "Only String allowed",
+  }),
+  personsasuraal: z.string().min(2, {
+    message: "Only String allowed",
+  }),
+  personmarrigestatus: z.string().regex(new RegExp(/^(MRD|UMD)$/), {
+    message: "Only MRD(Married)/UMD(Unmarried) is allowed",
   }),
 });
 
@@ -30,11 +57,21 @@ const PersonDetailForm = (props: Props) => {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      username: "",
+      personname: "",
+      personsurname: "",
+      personmodifiedname: "",
+      persongender: "",
+      persondob: "",
+      personDAstatus: "",
+      personlocation: "",
+      personmayka: "",
+      personsasuraal: "",
+      personmarrigestatus: "",
     },
   });
-
+  const { formState, reset } = form;
   function onSubmit(data: z.infer<typeof FormSchema>) {
+    console.log("inside onsubmit:", data);
     toast({
       title: "You submitted the following values:",
       description: (
@@ -45,6 +82,13 @@ const PersonDetailForm = (props: Props) => {
     });
   }
 
+  useEffect(() => {
+    console.log("formstate: ", formState.isSubmitSuccessful);
+    if (formState.isSubmitSuccessful) {
+      reset();
+    }
+  }, [formState, reset]);
+
   return (
     <Form {...form}>
       <form
@@ -53,12 +97,12 @@ const PersonDetailForm = (props: Props) => {
       >
         <FormField
           control={form.control}
-          name="username"
+          name="personname"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white">Username</FormLabel>
+              <FormLabel className="text-white">Name</FormLabel>
               <FormControl>
-                <Input placeholder="shadcn" {...field} />
+                <Input placeholder="Enter Name" {...field} />
               </FormControl>
               <FormDescription>
                 This is your public display name.
@@ -69,12 +113,12 @@ const PersonDetailForm = (props: Props) => {
         />
         <FormField
           control={form.control}
-          name="username"
+          name="personsurname"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white">Username</FormLabel>
+              <FormLabel className="text-white">Surname</FormLabel>
               <FormControl>
-                <Input placeholder="shadcn" {...field} />
+                <Input placeholder="Enter Surname" {...field} />
               </FormControl>
               <FormDescription>
                 This is your public display name.
@@ -85,12 +129,12 @@ const PersonDetailForm = (props: Props) => {
         />
         <FormField
           control={form.control}
-          name="username"
+          name="personmodifiedname"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white">Username</FormLabel>
+              <FormLabel className="text-white">Modified Name</FormLabel>
               <FormControl>
-                <Input placeholder="shadcn" {...field} />
+                <Input placeholder="Enter Modified Name" {...field} />
               </FormControl>
               <FormDescription>
                 This is your public display name.
@@ -101,12 +145,12 @@ const PersonDetailForm = (props: Props) => {
         />
         <FormField
           control={form.control}
-          name="username"
+          name="persongender"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white">Username</FormLabel>
+              <FormLabel className="text-white">Gender</FormLabel>
               <FormControl>
-                <Input placeholder="shadcn" {...field} />
+                <Input placeholder="M(Male)/F(Female)" {...field} />
               </FormControl>
               <FormDescription>
                 This is your public display name.
@@ -117,16 +161,97 @@ const PersonDetailForm = (props: Props) => {
         />
         <FormField
           control={form.control}
-          name="username"
+          name="persondob"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-white">Username</FormLabel>
+              <FormLabel className="text-white">Date of Birth</FormLabel>
               <FormControl>
-                <Input placeholder="shadcn" {...field} />
+                <Input placeholder="ex. dd/mm/yyyy" {...field} />
               </FormControl>
               <FormDescription>
                 This is your public display name.
               </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="personDAstatus"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white">Dead OR Alive</FormLabel>
+              <FormControl>
+                <Input placeholder="D(Dead)/A(Alive)" {...field} />
+              </FormControl>
+              <FormDescription>
+                This is your public display name.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="personlocation"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white">Location</FormLabel>
+              <FormControl>
+                <Input placeholder="ex. Balaghat" {...field} />
+              </FormControl>
+              <FormDescription>
+                Enter a city, village, town etc. name.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="personmayka"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white">Maayka</FormLabel>
+              <FormControl>
+                <Input placeholder="ex. Chichgaon" {...field} />
+              </FormControl>
+              <FormDescription>
+                Enter a city, village, town etc. name.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="personsasuraal"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white">Sasuraal</FormLabel>
+              <FormControl>
+                <Input placeholder="ex. Ankhiwada" {...field} />
+              </FormControl>
+              <FormDescription>
+                Enter a city, village, town etc. name.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="personmarrigestatus"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white">Marrige Status</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="ex. MRD(Married)/UMD(Unmarried)"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>What is marriage status.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
