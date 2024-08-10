@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
+import { UserRoundPlus } from "lucide-react";
 
 const FormSchema = z.object({
   personname: z.string().min(2, {
@@ -260,7 +261,7 @@ const PersonDetailForm = (props: Props) => {
           type="submit"
           className="text-white bg-sky-800 rounded-lg hover:bg-sky-700 transition-colors"
         >
-          Submit
+          <UserRoundPlus className="mr-2 h-4 w-4" /> Submit
         </Button>
       </form>
     </Form>

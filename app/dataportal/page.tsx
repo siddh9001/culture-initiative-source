@@ -7,8 +7,6 @@ import PersonRelationForm from "./personrelationform";
 type Props = {};
 
 const DataPortalPage = (props: Props) => {
-  const [addPerson, setAddPerson] = useState<boolean>(true);
-  const [addRelation, setAddRelation] = useState<boolean>(false);
   const [toggleForm, setToggleForm] = useState<boolean>(true);
   return (
     <div className="min-h-screen w-full bg-slate-900">

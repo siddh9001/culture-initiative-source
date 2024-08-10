@@ -1,11 +1,9 @@
-import React, { SetStateAction } from "react";
-import { Plus } from "lucide-react";
+import React from "react";
+import { UserRoundPlus, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 type SidePanelProps = {
-  setAddPerson?: React.Dispatch<React.SetStateAction<boolean>>;
-  setAddRelation?: React.Dispatch<React.SetStateAction<boolean>>;
   setToggleForm: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
@@ -18,7 +16,7 @@ const SidePanel = ({ setToggleForm }: SidePanelProps) => {
           setToggleForm(true);
         }}
       >
-        <Plus className="mr-2 h-4 w-4" /> Add Person Details
+        <UserRoundPlus className="mr-2 h-4 w-4" /> Add Person Details
       </Button>
       <Button
         className="text-white bg-sky-800 rounded-lg hover:bg-sky-700 transition-colors justify-start"
@@ -26,7 +24,7 @@ const SidePanel = ({ setToggleForm }: SidePanelProps) => {
           setToggleForm(false);
         }}
       >
-        <Plus className="mr-2 h-4 w-4" /> Add Person Relationship
+        <Users className="mr-2 h-4 w-4" /> Add Person Relationship
       </Button>
     </div>
   );
