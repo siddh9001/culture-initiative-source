@@ -1,7 +1,11 @@
 "use client";
 import React, { useState, useRef } from "react";
 import { TbCirclesRelation } from "react-icons/tb";
-import { fetchData, convertToCytoscapeElements } from "../utils/neo4j";
+import {
+  fetchData,
+  fetchNames,
+  convertToCytoscapeElements,
+} from "../utils/neo4j";
 import cytoscape from "cytoscape";
 
 type Props = {};
@@ -9,6 +13,7 @@ type Props = {};
 const SearchPage = (props: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [nameLoading, setNameLoading] = useState<boolean>(false);
   const [fromPerson, setFromPerson] = useState<string>("");
   const [toPerson, setToPerson] = useState<string>("");
 
@@ -18,6 +23,22 @@ const SearchPage = (props: Props) => {
 
   const onChangeTo = (event: React.ChangeEvent<HTMLInputElement>) => {
     setToPerson(event.target.value);
+  };
+
+  const onNameSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${val}' OR lower(p.person_name) ENDS WITH '${val}' OR lower(p.person_name) CONTAINS '${val}' RETURN p.person_name AS name`;
+    try {
+      setNameLoading(true);
+      if (val !== "" && val.length > 2) {
+        const result = await fetchNames(query);
+        // console.log("names list: ", result);
+      }
+    } catch (error) {
+      console.error("error loading name: ", error);
+    } finally {
+      setNameLoading(false);
+    }
   };
 
   const onClickSearch = async () => {

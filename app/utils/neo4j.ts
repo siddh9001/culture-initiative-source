@@ -5,6 +5,7 @@ const neo4jUri = process.env.NEXT_PUBLIC_NEO4J_URI!;
 const neo4jUser = process.env.NEXT_PUBLIC_NEO4J_USERNAME!;
 const neo4jPassword = process.env.NEXT_PUBLIC_NEO4J_PASSWORD!;
 
+// ===================================== function to return the relationship data ===================================
 export async function fetchData(query: string) {
   const driver = neo4j.driver(
     neo4jUri,
@@ -15,6 +16,25 @@ export async function fetchData(query: string) {
   try {
     const result = await session.run(query);
     return result.records.map((record) => record.toObject());
+  } catch (error) {
+    console.log("error neo4j driver: ", error);
+  } finally {
+    await session.close();
+    await driver.close();
+  }
+}
+
+//===================================== function to return list of names searched ===================================
+export async function fetchNames(query: string) {
+  const driver = neo4j.driver(
+    neo4jUri,
+    neo4j.auth.basic(neo4jUser, neo4jPassword)
+  );
+  const session = driver.session();
+
+  try {
+    const result = await session.run(query);
+    return result.records.map((record) => record.toObject().name);
   } catch (error) {
     console.log("error neo4j driver: ", error);
   } finally {
