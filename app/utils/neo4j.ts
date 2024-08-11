@@ -34,7 +34,7 @@ export async function fetchNames(query: string) {
 
   try {
     const result = await session.run(query);
-    return result.records.map((record) => record.toObject().name);
+    return result.records.map((record) => record.toObject());
   } catch (error) {
     console.log("error neo4j driver: ", error);
   } finally {

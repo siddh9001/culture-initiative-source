@@ -31,30 +31,26 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { fetchNames } from "../utils/neo4j";
+import { RecordShape } from "neo4j-driver";
 type Props = {};
-type NameListType = {
-  value: string;
-  label: string;
-};
 
 const PersonRelationForm = (props: Props) => {
-  const [nameList, setNameList] = useState<NameListType[]>([]);
+  const [personList, setPersonList] = useState<RecordShape[] | undefined>([]);
   const [nameLoading, setNameLoading] = useState<boolean>(false);
   const [fromNameOpen, setFromNameOpen] = useState<boolean>(false);
   const [fromNameValue, setFromNameValue] = useState<string>("");
+  const [toNameOpen, setToNameOpen] = useState<boolean>(false);
+  const [toNameValue, setToNameValue] = useState<string>("");
 
   const onNameSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${val}' OR lower(p.person_name) ENDS WITH '${val}' OR lower(p.person_name) CONTAINS '${val}' RETURN p.person_name AS name`;
+    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${val}' OR lower(p.person_name) ENDS WITH '${val}' OR lower(p.person_name) CONTAINS '${val}' RETURN p.person_name AS name, p.person_id AS id`;
     try {
       setNameLoading(true);
       if (val !== "" && val.length > 2) {
         const result = await fetchNames(query);
-        console.log("names list: ", result);
-        result?.forEach((name) =>
-          setNameList([...nameList, { value: name, label: name }])
-        );
-        // setNameList(result);
+        // console.log("names list: ", result);
+        setPersonList(result);
       }
     } catch (error) {
       console.error("error loading name: ", error);
@@ -63,46 +59,45 @@ const PersonRelationForm = (props: Props) => {
     }
   };
   const onSubmitRelation = () => {};
+  // console.log("personList: ", personList);
+  // console.log("fromNameValue: ", fromNameValue);
+  // console.log("toNameValue: ", toNameValue);
 
   return (
     <div className="w-full space-y-6 p-8 border-[1px] border-zinc-400">
       <div className="grid w-full items-center gap-1.5">
-        {/* <Label htmlFor="frompersonsearch" className="text-white">
-          From Person
-        </Label>
-        <Input
-          type="search"
-          id="frompersonsearch"
-          placeholder="ex. Father name"
-          onChange={onNameSearch}
-        /> */}
         <Popover open={fromNameOpen} onOpenChange={setFromNameOpen}>
+          <Label className="text-white">From Person</Label>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               role="combobox"
               aria-expanded={fromNameOpen}
-              className="w-[460px] justify-start"
+              className="w-[468px] justify-start text-black"
             >
               {fromNameValue
-                ? nameList.find((name) => name.value === fromNameValue)?.label
+                ? personList?.find((person) => person.id === fromNameValue)
+                    ?.name
                 : "Search Name..."}
-              {/* <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" /> */}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[460px]">
+          <PopoverContent className="w-[468px]">
             <Command>
               <CommandInput
-                placeholder="Search Name..."
+                placeholder="From Person"
                 onChangeCapture={onNameSearch}
               />
               <CommandList>
-                <CommandEmpty>No framework found.</CommandEmpty>
+                {nameLoading ? (
+                  <p className="text-gray-800 p-4 text-md">Loading...</p>
+                ) : (
+                  <CommandEmpty>No Person found.</CommandEmpty>
+                )}
                 <CommandGroup>
-                  {nameList.map((name) => (
+                  {personList?.map((person) => (
                     <CommandItem
-                      key={name.value}
-                      value={name.value}
+                      key={person.id}
+                      value={person.id}
                       onSelect={(currentValue) => {
                         setFromNameValue(
                           currentValue === fromNameValue ? "" : currentValue
@@ -113,12 +108,12 @@ const PersonRelationForm = (props: Props) => {
                       <Check
                         className={cn(
                           "mr-2 h-4 w-4",
-                          fromNameValue === name.value
+                          fromNameValue === person.id
                             ? "opacity-100"
                             : "opacity-0"
                         )}
                       />
-                      {name.label}
+                      {person.name}
                     </CommandItem>
                   ))}
                 </CommandGroup>
@@ -126,9 +121,8 @@ const PersonRelationForm = (props: Props) => {
             </Command>
           </PopoverContent>
         </Popover>
-        {/* <div className="absolute m-8"></div> */}
       </div>
-      <div className="grid w-full items-center gap-1.5">
+      <div className="grid w-[468px] items-center gap-1.5">
         <Label htmlFor="realtiontype" className="text-white">
           Relation Type
         </Label>
@@ -156,15 +150,60 @@ const PersonRelationForm = (props: Props) => {
         </Select>
       </div>
       <div className="grid w-full items-center gap-1.5">
-        <Label htmlFor="topersonsearch" className="text-white">
-          To Person
-        </Label>
-        <Input
-          type="search"
-          id="topersonsearch"
-          placeholder="ex. Child name"
-          onChange={onNameSearch}
-        />
+        <Popover open={toNameOpen} onOpenChange={setToNameOpen}>
+          <Label className="text-white">To Person</Label>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={toNameOpen}
+              className="w-[468px] justify-start"
+            >
+              {toNameValue
+                ? personList?.find((person) => person.id === toNameValue)?.name
+                : "Search Name..."}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[468px]">
+            <Command>
+              <CommandInput
+                placeholder="To Person"
+                onChangeCapture={onNameSearch}
+              />
+              <CommandList>
+                {nameLoading ? (
+                  <p className="text-gray-800 p-4 text-md">Loading...</p>
+                ) : (
+                  <CommandEmpty>No Person found.</CommandEmpty>
+                )}
+                <CommandGroup>
+                  {personList?.map((person) => (
+                    <CommandItem
+                      key={person.id}
+                      value={person.id}
+                      onSelect={(currentValue) => {
+                        setToNameValue(
+                          currentValue === toNameValue ? "" : currentValue
+                        );
+                        setToNameOpen(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          toNameValue === person.id
+                            ? "opacity-100"
+                            : "opacity-0"
+                        )}
+                      />
+                      {person.name}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
       </div>
       <Button
         type="submit"
