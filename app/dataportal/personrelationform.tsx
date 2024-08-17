@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,22 +35,43 @@ import { RecordShape } from "neo4j-driver";
 type Props = {};
 
 const PersonRelationForm = (props: Props) => {
-  const [personList, setPersonList] = useState<RecordShape[] | undefined>([]);
+  const [fromPersonList, setFromPersonList] = useState<
+    RecordShape[] | undefined
+  >([]);
+  const [toPersonList, setToPersonList] = useState<RecordShape[] | undefined>(
+    []
+  );
   const [nameLoading, setNameLoading] = useState<boolean>(false);
   const [fromNameOpen, setFromNameOpen] = useState<boolean>(false);
   const [fromNameValue, setFromNameValue] = useState<string>("");
   const [toNameOpen, setToNameOpen] = useState<boolean>(false);
   const [toNameValue, setToNameValue] = useState<string>("");
 
-  const onNameSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onFromNameSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${val}' OR lower(p.person_name) ENDS WITH '${val}' OR lower(p.person_name) CONTAINS '${val}' RETURN p.person_name AS name, p.person_id AS id`;
     try {
       setNameLoading(true);
       if (val !== "" && val.length > 2) {
         const result = await fetchNames(query);
-        // console.log("names list: ", result);
-        setPersonList(result);
+        // console.log("names list: ", result, typeof result);
+        setFromPersonList(result);
+      }
+    } catch (error) {
+      console.error("error loading name: ", error);
+    } finally {
+      setNameLoading(false);
+    }
+  };
+  const onToNameSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${val}' OR lower(p.person_name) ENDS WITH '${val}' OR lower(p.person_name) CONTAINS '${val}' RETURN p.person_name AS name, p.person_id AS id`;
+    try {
+      setNameLoading(true);
+      if (val !== "" && val.length > 2) {
+        const result = await fetchNames(query);
+        // console.log("names list: ", result, typeof result);
+        setToPersonList(result);
       }
     } catch (error) {
       console.error("error loading name: ", error);
@@ -62,7 +83,6 @@ const PersonRelationForm = (props: Props) => {
   // console.log("personList: ", personList);
   // console.log("fromNameValue: ", fromNameValue);
   // console.log("toNameValue: ", toNameValue);
-
   return (
     <div className="w-full space-y-6 p-8 border-[1px] border-zinc-400">
       <div className="grid w-full items-center gap-1.5">
@@ -76,7 +96,7 @@ const PersonRelationForm = (props: Props) => {
               className="w-[468px] justify-start text-black"
             >
               {fromNameValue
-                ? personList?.find((person) => person.id === fromNameValue)
+                ? fromPersonList?.find((person) => person.id === fromNameValue)
                     ?.name
                 : "Search Name..."}
             </Button>
@@ -85,16 +105,14 @@ const PersonRelationForm = (props: Props) => {
             <Command>
               <CommandInput
                 placeholder="From Person"
-                onChangeCapture={onNameSearch}
+                onChangeCapture={onFromNameSearch}
               />
               <CommandList>
-                {nameLoading ? (
-                  <p className="text-gray-800 p-4 text-md">Loading...</p>
-                ) : (
-                  <CommandEmpty>No Person found.</CommandEmpty>
-                )}
+                <CommandEmpty>
+                  {nameLoading ? "Loading..." : "No Person found."}
+                </CommandEmpty>
                 <CommandGroup>
-                  {personList?.map((person) => (
+                  {fromPersonList?.map((person) => (
                     <CommandItem
                       key={person.id}
                       value={person.id}
@@ -160,7 +178,8 @@ const PersonRelationForm = (props: Props) => {
               className="w-[468px] justify-start"
             >
               {toNameValue
-                ? personList?.find((person) => person.id === toNameValue)?.name
+                ? toPersonList?.find((person) => person.id === toNameValue)
+                    ?.name
                 : "Search Name..."}
             </Button>
           </PopoverTrigger>
@@ -168,16 +187,14 @@ const PersonRelationForm = (props: Props) => {
             <Command>
               <CommandInput
                 placeholder="To Person"
-                onChangeCapture={onNameSearch}
+                onChangeCapture={onToNameSearch}
               />
               <CommandList>
-                {nameLoading ? (
-                  <p className="text-gray-800 p-4 text-md">Loading...</p>
-                ) : (
-                  <CommandEmpty>No Person found.</CommandEmpty>
-                )}
+                <CommandEmpty>
+                  {nameLoading ? "Loading..." : "No Person found."}
+                </CommandEmpty>
                 <CommandGroup>
-                  {personList?.map((person) => (
+                  {toPersonList?.map((person) => (
                     <CommandItem
                       key={person.id}
                       value={person.id}

@@ -17,7 +17,7 @@ export async function fetchData(query: string) {
     const result = await session.run(query);
     return result.records.map((record) => record.toObject());
   } catch (error) {
-    console.log("error neo4j driver: ", error);
+    console.log("fetchdata error: ", error);
   } finally {
     await session.close();
     await driver.close();
@@ -36,7 +36,27 @@ export async function fetchNames(query: string) {
     const result = await session.run(query);
     return result.records.map((record) => record.toObject());
   } catch (error) {
-    console.log("error neo4j driver: ", error);
+    console.error("fetchnames error: ", error);
+  } finally {
+    await session.close();
+    await driver.close();
+  }
+}
+
+// ==================================== function to create a person node ============================================
+export async function CreatePersonNode(query: string) {
+  const driver = neo4j.driver(
+    neo4jUri,
+    neo4j.auth.basic(neo4jUser, neo4jPassword)
+  );
+  const session = driver.session();
+
+  try {
+    const result = await session.run(query);
+    // console.log("node create success: ", result);
+    // return result.records.map((record) => record.toObject());
+  } catch (error) {
+    console.error("node create error: ", error);
   } finally {
     await session.close();
     await driver.close();

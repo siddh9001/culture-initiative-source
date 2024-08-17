@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { UserRoundPlus } from "lucide-react";
+import { CreatePersonNode } from "../utils/neo4j";
 
 const FormSchema = z.object({
   personname: z.string().min(2, {
@@ -71,20 +72,35 @@ const PersonDetailForm = (props: Props) => {
     },
   });
   const { formState, reset } = form;
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
     console.log("inside onsubmit:", data);
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+    // toast({
+    //   title: "You submitted the following values:",
+    //   description: (
+    //     <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+    //       <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+    //     </pre>
+    //   ),
+    // });
+    const new_person_id = crypto.randomUUID().replace(/-/g, "").slice(0, 8);
+    const query = `MERGE (p:Person {person_id: '${new_person_id}'})
+        SET
+        p.person_name = '${data.personname}', 
+        p.person_surname = '${data.personsurname}', 
+        p.person_modified_name = '${data.personmodifiedname}', 
+        p.person_gender = '${data.persongender}', 
+        p.person_dob = '${data.persondob}', 
+        p.person_birth_place = '${data.personlocation}', 
+        p.person_D_A_status = '${data.personDAstatus}', 
+        p.person_sasuraal = '${data.personsasuraal}', 
+        p.person_mayka = '${data.personmayka}', 
+        p.person_marrige_status = '${data.personmarrigestatus}', 
+        p.created_at = timestamp()`;
+    await CreatePersonNode(query);
   }
 
   useEffect(() => {
-    console.log("formstate: ", formState.isSubmitSuccessful);
+    // console.log("formstate: ", formState.isSubmitSuccessful);
     if (formState.isSubmitSuccessful) {
       reset();
     }
