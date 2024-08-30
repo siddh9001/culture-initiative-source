@@ -79,7 +79,9 @@ const PersonRelationForm = (props: Props) => {
       setNameLoading(false);
     }
   };
-  const onSubmitRelation = () => {};
+  const onSubmitRelation = () => {
+    const query = `CREATE p = (a:Person {person_id: ${fromNameValue}})-[:SISTER_IS]->(b:Person {person_id: ${toNameValue}}) RETURN p;`;
+  };
   // console.log("personList: ", personList);
   // console.log("fromNameValue: ", fromNameValue);
   // console.log("toNameValue: ", toNameValue);
