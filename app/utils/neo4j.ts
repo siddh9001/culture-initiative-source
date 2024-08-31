@@ -63,6 +63,26 @@ export async function CreatePersonNode(query: string) {
   }
 }
 
+// ==================================== function to create a person node ============================================
+export async function CreateRelationship(query: string) {
+  const driver = neo4j.driver(
+    neo4jUri,
+    neo4j.auth.basic(neo4jUser, neo4jPassword)
+  );
+  const session = driver.session();
+
+  try {
+    const result = await session.run(query);
+    // console.log("relation create success: ", result);
+    // return result.records.map((record) => record.toObject());
+  } catch (error) {
+    console.error("node create error: ", error);
+  } finally {
+    await session.close();
+    await driver.close();
+  }
+}
+
 export function convertToCytoscapeElements(
   paths: RecordShape[] | undefined
 ): cytoscape.ElementDefinition[] {

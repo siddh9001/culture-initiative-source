@@ -30,7 +30,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { fetchNames } from "../utils/neo4j";
+import { fetchNames, CreateRelationship } from "../utils/neo4j";
 import { RecordShape } from "neo4j-driver";
 type Props = {};
 
@@ -46,9 +46,10 @@ const PersonRelationForm = (props: Props) => {
   const [fromNameValue, setFromNameValue] = useState<string>("");
   const [toNameOpen, setToNameOpen] = useState<boolean>(false);
   const [toNameValue, setToNameValue] = useState<string>("");
+  const [relationValue, setRelationValue] = useState<string>("");
 
-  const onFromNameSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
+  const onFromNameSearch = async (val: string) => {
+    // const val = e.target.value;
     const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${val}' OR lower(p.person_name) ENDS WITH '${val}' OR lower(p.person_name) CONTAINS '${val}' RETURN p.person_name AS name, p.person_id AS id`;
     try {
       setNameLoading(true);
@@ -56,11 +57,13 @@ const PersonRelationForm = (props: Props) => {
         const result = await fetchNames(query);
         // console.log("names list: ", result, typeof result);
         setFromPersonList(result);
+        // setFromNameOpen(false);
       }
     } catch (error) {
       console.error("error loading name: ", error);
     } finally {
       setNameLoading(false);
+      // setFromNameOpen(true);
     }
   };
   const onToNameSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,12 +82,17 @@ const PersonRelationForm = (props: Props) => {
       setNameLoading(false);
     }
   };
-  const onSubmitRelation = () => {
-    const query = `CREATE p = (a:Person {person_id: ${fromNameValue}})-[:SISTER_IS]->(b:Person {person_id: ${toNameValue}}) RETURN p;`;
+  const onSubmitRelation = async () => {
+    const query = `MATCH (a:Person {person_id: "${fromNameValue}"}) WITH a MATCH (b:Person {person_id: "${toNameValue}"}) MERGE (a)-[:${relationValue}]->(b);`;
+    try {
+      if (fromNameValue !== "" && toNameValue !== "" && relationValue !== "") {
+        await CreateRelationship(query);
+      }
+    } catch (error) {
+      console.error("relation submit error:", error);
+    }
   };
-  // console.log("personList: ", personList);
-  // console.log("fromNameValue: ", fromNameValue);
-  // console.log("toNameValue: ", toNameValue);
+
   return (
     <div className="w-full space-y-6 p-8 border-[1px] border-zinc-400">
       <div className="grid w-full items-center gap-1.5">
@@ -107,7 +115,9 @@ const PersonRelationForm = (props: Props) => {
             <Command>
               <CommandInput
                 placeholder="From Person"
-                onChangeCapture={onFromNameSearch}
+                // onChangeCapture={onFromNameSearch}
+                // value={input}
+                onValueChange={onFromNameSearch}
               />
               <CommandList>
                 <CommandEmpty>
@@ -146,12 +156,12 @@ const PersonRelationForm = (props: Props) => {
         <Label htmlFor="realtiontype" className="text-white">
           Relation Type
         </Label>
-        <Select>
+        <Select onValueChange={(val) => setRelationValue(val)}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Ex. FATHER_IS" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="null">None</SelectItem>
+            {/* <SelectItem value="null">None</SelectItem> */}
             <SelectItem value="MOTHER_IS">MOTHER_IS</SelectItem>
             <SelectItem value="FATHER_IS">FATHER_IS</SelectItem>
             <SelectItem value="BROTHER_IS">BROTHER_IS</SelectItem>
