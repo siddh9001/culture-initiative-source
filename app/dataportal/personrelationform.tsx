@@ -30,11 +30,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useToast } from "@/components/hooks/use-toast";
 import { fetchNames, CreateRelationship } from "../utils/neo4j";
 import { RecordShape } from "neo4j-driver";
 type Props = {};
 
 const PersonRelationForm = (props: Props) => {
+  const { toast } = useToast();
   const [fromPersonList, setFromPersonList] = useState<
     RecordShape[] | undefined
   >([]);
@@ -47,6 +49,14 @@ const PersonRelationForm = (props: Props) => {
   const [toNameOpen, setToNameOpen] = useState<boolean>(false);
   const [toNameValue, setToNameValue] = useState<string>("");
   const [relationValue, setRelationValue] = useState<string>("");
+  const [fromName, setFromName] = useState<string>("");
+
+  useEffect(() => {
+    const setData = setTimeout(async () => {
+      await onFromNameSearch(fromName);
+    }, 1500);
+    return () => clearTimeout(setData);
+  }, [fromName]);
 
   const onFromNameSearch = async (val: string) => {
     // const val = e.target.value;
@@ -55,15 +65,13 @@ const PersonRelationForm = (props: Props) => {
       setNameLoading(true);
       if (val !== "" && val.length > 2) {
         const result = await fetchNames(query);
-        // console.log("names list: ", result, typeof result);
+        console.log("names list: ", result, typeof result);
         setFromPersonList(result);
-        // setFromNameOpen(false);
       }
     } catch (error) {
       console.error("error loading name: ", error);
     } finally {
       setNameLoading(false);
-      // setFromNameOpen(true);
     }
   };
   const onToNameSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,9 +95,28 @@ const PersonRelationForm = (props: Props) => {
     try {
       if (fromNameValue !== "" && toNameValue !== "" && relationValue !== "") {
         await CreateRelationship(query);
+        toast({
+          description: "Relation Created Successfully!",
+          variant: "success",
+        });
+      } else {
+        toast({
+          description: "persons required",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("relation submit error:", error);
+      toast({
+        description: "unable to create relationship",
+        variant: "destructive",
+      });
+    } finally {
+      setFromNameValue("");
+      setToNameValue("");
+      setRelationValue("");
+      setFromPersonList([]);
+      setToPersonList([]);
     }
   };
 
@@ -116,12 +143,13 @@ const PersonRelationForm = (props: Props) => {
               <CommandInput
                 placeholder="From Person"
                 // onChangeCapture={onFromNameSearch}
-                // value={input}
-                onValueChange={onFromNameSearch}
+                value={fromName}
+                onValueChange={(value) => setFromName(value)}
               />
               <CommandList>
                 <CommandEmpty>
-                  {nameLoading ? "Loading..." : "No Person found."}
+                  {/* {nameLoading ? "Loading..." : "No Person found."} */}
+                  No Person found.
                 </CommandEmpty>
                 <CommandGroup>
                   {fromPersonList?.map((person) => (
@@ -156,12 +184,15 @@ const PersonRelationForm = (props: Props) => {
         <Label htmlFor="realtiontype" className="text-white">
           Relation Type
         </Label>
-        <Select onValueChange={(val) => setRelationValue(val)}>
+        <Select
+          onValueChange={(val) => setRelationValue(val)}
+          value={relationValue}
+        >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Ex. FATHER_IS" />
           </SelectTrigger>
           <SelectContent>
-            {/* <SelectItem value="null">None</SelectItem> */}
+            {/* <SelectItem value="">None</SelectItem> */}
             <SelectItem value="MOTHER_IS">MOTHER_IS</SelectItem>
             <SelectItem value="FATHER_IS">FATHER_IS</SelectItem>
             <SelectItem value="BROTHER_IS">BROTHER_IS</SelectItem>
