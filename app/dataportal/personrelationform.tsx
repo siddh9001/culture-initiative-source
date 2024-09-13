@@ -33,6 +33,10 @@ import {
 import { useToast } from "@/components/hooks/use-toast";
 import { fetchNames, CreateRelationship } from "../utils/neo4j";
 import { RecordShape } from "neo4j-driver";
+type FromNameType = {
+  name?: string;
+  id?: string;
+};
 type Props = {};
 
 const PersonRelationForm = (props: Props) => {
@@ -54,18 +58,19 @@ const PersonRelationForm = (props: Props) => {
   useEffect(() => {
     const setData = setTimeout(async () => {
       await onFromNameSearch(fromName);
-    }, 1500);
+    }, 1000);
     return () => clearTimeout(setData);
   }, [fromName]);
 
   const onFromNameSearch = async (val: string) => {
     // const val = e.target.value;
-    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${val}' OR lower(p.person_name) ENDS WITH '${val}' OR lower(p.person_name) CONTAINS '${val}' RETURN p.person_name AS name, p.person_id AS id`;
+    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${val}' OR lower(p.person_name) ENDS WITH '${val}' OR lower(p.person_name) CONTAINS '${val}' RETURN p.person_name AS name, p.person_surname as lname, p.person_id AS id`;
+    // const query = `MATCH (p:Person) WHERE p.person_id STARTS WITH '${val}' return p.person_name AS name, p.person_id AS id`;
     try {
       setNameLoading(true);
       if (val !== "" && val.length > 2) {
         const result = await fetchNames(query);
-        console.log("names list: ", result, typeof result);
+        // console.log("names list: ", result, typeof result);
         setFromPersonList(result);
       }
     } catch (error) {
@@ -133,8 +138,14 @@ const PersonRelationForm = (props: Props) => {
               className="w-[468px] justify-start text-black"
             >
               {fromNameValue
-                ? fromPersonList?.find((person) => person.id === fromNameValue)
-                    ?.name
+                ? (() => {
+                    const res = fromPersonList?.find(
+                      (person) => person.id === fromNameValue
+                    );
+                    return res
+                      ? `${res?.name} ${res?.lname}`
+                      : "Search Name...";
+                  })()
                 : "Search Name..."}
             </Button>
           </PopoverTrigger>
@@ -148,8 +159,7 @@ const PersonRelationForm = (props: Props) => {
               />
               <CommandList>
                 <CommandEmpty>
-                  {/* {nameLoading ? "Loading..." : "No Person found."} */}
-                  No Person found.
+                  {nameLoading ? "Loading..." : "No Person found."}
                 </CommandEmpty>
                 <CommandGroup>
                   {fromPersonList?.map((person) => (
@@ -171,7 +181,7 @@ const PersonRelationForm = (props: Props) => {
                             : "opacity-0"
                         )}
                       />
-                      {person.name}
+                      {person.name + " " + person.lname}
                     </CommandItem>
                   ))}
                 </CommandGroup>
