@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -24,6 +24,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -151,12 +152,21 @@ const PersonRelationForm = (props: Props) => {
           </PopoverTrigger>
           <PopoverContent className="w-[468px]">
             <Command>
-              <CommandInput
+              {/* <CommandInput
                 placeholder="From Person"
-                // onChangeCapture={onFromNameSearch}
-                value={fromName}
+                // onChangeCapture={(e) => setFromName(e.currentTarget.value)}
                 onValueChange={(value) => setFromName(value)}
-              />
+              /> */}
+              <div className="flex items-center border-b px-3">
+                <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                <input
+                  placeholder="From Person"
+                  value={fromName}
+                  onChange={(e) => setFromName(e.currentTarget.value)}
+                  className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-slate-500 disabled:cursor-not-allowed disabled:opacity-50 dark:placeholder:text-slate-400"
+                />
+              </div>
+              {/* <CommandSeparator /> */}
               <CommandList>
                 <CommandEmpty>
                   {nameLoading ? "Loading..." : "No Person found."}
