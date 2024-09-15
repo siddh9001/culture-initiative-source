@@ -55,6 +55,7 @@ const PersonRelationForm = (props: Props) => {
   const [toNameValue, setToNameValue] = useState<string>("");
   const [relationValue, setRelationValue] = useState<string>("");
   const [fromName, setFromName] = useState<string>("");
+  const [toName, setToName] = useState<string>("");
 
   useEffect(() => {
     const setData = setTimeout(async () => {
@@ -63,13 +64,20 @@ const PersonRelationForm = (props: Props) => {
     return () => clearTimeout(setData);
   }, [fromName]);
 
+  useEffect(() => {
+    const setData = setTimeout(async () => {
+      await onToNameSearch(toName);
+    }, 1000);
+    return () => clearTimeout(setData);
+  }, [toName]);
+
   const onFromNameSearch = async (val: string) => {
-    // const val = e.target.value;
-    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${val}' OR lower(p.person_name) ENDS WITH '${val}' OR lower(p.person_name) CONTAINS '${val}' RETURN p.person_name AS name, p.person_surname as lname, p.person_id AS id`;
+    const str = val.toLowerCase();
+    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${str}' OR lower(p.person_name) ENDS WITH '${str}' OR lower(p.person_name) CONTAINS '${str}' RETURN p.person_name AS name, p.person_surname as lname, p.person_id AS id`;
     // const query = `MATCH (p:Person) WHERE p.person_id STARTS WITH '${val}' return p.person_name AS name, p.person_id AS id`;
     try {
       setNameLoading(true);
-      if (val !== "" && val.length > 2) {
+      if (str !== "" && str.length > 2) {
         const result = await fetchNames(query);
         // console.log("names list: ", result, typeof result);
         setFromPersonList(result);
@@ -80,12 +88,12 @@ const PersonRelationForm = (props: Props) => {
       setNameLoading(false);
     }
   };
-  const onToNameSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${val}' OR lower(p.person_name) ENDS WITH '${val}' OR lower(p.person_name) CONTAINS '${val}' RETURN p.person_name AS name, p.person_id AS id`;
+  const onToNameSearch = async (val: string) => {
+    const str = val.toLowerCase();
+    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${str}' OR lower(p.person_name) ENDS WITH '${str}' OR lower(p.person_name) CONTAINS '${str}' RETURN p.person_name AS name, p.person_surname as lname, p.person_id AS id`;
     try {
       setNameLoading(true);
-      if (val !== "" && val.length > 2) {
+      if (str !== "" && str.length > 2) {
         const result = await fetchNames(query);
         // console.log("names list: ", result, typeof result);
         setToPersonList(result);
@@ -107,7 +115,7 @@ const PersonRelationForm = (props: Props) => {
         });
       } else {
         toast({
-          description: "persons required",
+          description: "Something went wrong!!",
           variant: "destructive",
         });
       }
@@ -166,7 +174,6 @@ const PersonRelationForm = (props: Props) => {
                   className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-slate-500 disabled:cursor-not-allowed disabled:opacity-50 dark:placeholder:text-slate-400"
                 />
               </div>
-              {/* <CommandSeparator /> */}
               <CommandList>
                 <CommandEmpty>
                   {nameLoading ? "Loading..." : "No Person found."}
@@ -241,17 +248,32 @@ const PersonRelationForm = (props: Props) => {
               className="w-[468px] justify-start"
             >
               {toNameValue
-                ? toPersonList?.find((person) => person.id === toNameValue)
-                    ?.name
+                ? (() => {
+                    const res = toPersonList?.find(
+                      (person) => person.id === toNameValue
+                    );
+                    return res
+                      ? `${res?.name} ${res?.lname}`
+                      : "Search Name...";
+                  })()
                 : "Search Name..."}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-[468px]">
             <Command>
-              <CommandInput
+              {/* <CommandInput
                 placeholder="To Person"
                 onChangeCapture={onToNameSearch}
-              />
+              /> */}
+              <div className="flex items-center border-b px-3">
+                <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                <input
+                  placeholder="From Person"
+                  value={toName}
+                  onChange={(e) => setToName(e.currentTarget.value)}
+                  className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-slate-500 disabled:cursor-not-allowed disabled:opacity-50 dark:placeholder:text-slate-400"
+                />
+              </div>
               <CommandList>
                 <CommandEmpty>
                   {nameLoading ? "Loading..." : "No Person found."}
@@ -276,7 +298,7 @@ const PersonRelationForm = (props: Props) => {
                             : "opacity-0"
                         )}
                       />
-                      {person.name}
+                      {person.name + " " + person.lname}
                     </CommandItem>
                   ))}
                 </CommandGroup>

@@ -1,7 +1,6 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { TbCirclesRelation } from "react-icons/tb";
 import {
   fetchData,
@@ -9,23 +8,13 @@ import {
   convertToCytoscapeElements,
 } from "../utils/neo4j";
 import cytoscape from "cytoscape";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
@@ -49,28 +38,34 @@ const SearchPage = (props: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [nameLoading, setNameLoading] = useState<boolean>(false);
   const [fromNameOpen, setFromNameOpen] = useState<boolean>(false);
-  // const [fromPerson, setFromPerson] = useState<string>("");
   const [fromNameValue, setFromNameValue] = useState<string>("");
   const [toNameOpen, setToNameOpen] = useState<boolean>(false);
   const [toNameValue, setToNameValue] = useState<string>("");
-  // const [toPerson, setToPerson] = useState<string>("");
+  const [fromName, setFromName] = useState<string>("");
+  const [toName, setToName] = useState<string>("");
 
-  // const onChangeFrom = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   setFromPerson(event.target.value);
-  // };
+  useEffect(() => {
+    const setData = setTimeout(async () => {
+      await onFromNameSearch(fromName);
+    }, 1000);
+    return () => clearTimeout(setData);
+  }, [fromName]);
 
-  // const onChangeTo = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   setToPerson(event.target.value);
-  // };
+  useEffect(() => {
+    const setData = setTimeout(async () => {
+      await onToNameSearch(toName);
+    }, 1000);
+    return () => clearTimeout(setData);
+  }, [toName]);
 
-  const onFromNameSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${val}' OR lower(p.person_name) ENDS WITH '${val}' OR lower(p.person_name) CONTAINS '${val}' RETURN p.person_name AS name, p.person_id AS id`;
+  const onFromNameSearch = async (val: string) => {
+    const str = val.toLowerCase();
+    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${str}' OR lower(p.person_name) ENDS WITH '${str}' OR lower(p.person_name) CONTAINS '${str}' RETURN p.person_name AS name, p.person_surname as lname, p.person_id AS id`;
     try {
       setNameLoading(true);
-      if (val !== "" && val.length > 2) {
+      if (str !== "" && str.length > 2) {
         const result = await fetchNames(query);
-        console.log("names list: ", result, typeof result);
+        // console.log("names list: ", result, typeof result);
         setFromPersonList(result);
       }
     } catch (error) {
@@ -79,14 +74,14 @@ const SearchPage = (props: Props) => {
       setNameLoading(false);
     }
   };
-  const onToNameSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${val}' OR lower(p.person_name) ENDS WITH '${val}' OR lower(p.person_name) CONTAINS '${val}' RETURN p.person_name AS name, p.person_id AS id`;
+  const onToNameSearch = async (val: string) => {
+    const str = val.toLowerCase();
+    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${str}' OR lower(p.person_name) ENDS WITH '${str}' OR lower(p.person_name) CONTAINS '${str}' RETURN p.person_name AS name, p.person_surname as lname, p.person_id AS id`;
     try {
       setNameLoading(true);
-      if (val !== "" && val.length > 2) {
+      if (str !== "" && str.length > 2) {
         const result = await fetchNames(query);
-        console.log("names list: ", result, typeof result);
+        // console.log("names list: ", result, typeof result);
         setToPersonList(result);
       }
     } catch (error) {
@@ -174,18 +169,26 @@ const SearchPage = (props: Props) => {
                 className="w-[468px] justify-start text-black"
               >
                 {fromNameValue
-                  ? fromPersonList?.find(
-                      (person) => person.id === fromNameValue
-                    )?.name
+                  ? (() => {
+                      const res = fromPersonList?.find(
+                        (person) => person.id === fromNameValue
+                      );
+                      return res ? `${res?.name} ${res?.lname}` : "From Person";
+                    })()
                   : "From Person"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[468px]">
               <Command>
-                <CommandInput
-                  placeholder="From Person"
-                  onChangeCapture={onFromNameSearch}
-                />
+                <div className="flex items-center border-b px-3">
+                  <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                  <input
+                    placeholder="Type Name here..."
+                    value={fromName}
+                    onChange={(e) => setFromName(e.currentTarget.value)}
+                    className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-slate-500 disabled:cursor-not-allowed disabled:opacity-50 dark:placeholder:text-slate-400"
+                  />
+                </div>
                 <CommandList>
                   <CommandEmpty>
                     {nameLoading ? "Loading..." : "No Person found."}
@@ -210,7 +213,7 @@ const SearchPage = (props: Props) => {
                               : "opacity-0"
                           )}
                         />
-                        {person.name}
+                        {person.name + " " + person.lname}
                       </CommandItem>
                     ))}
                   </CommandGroup>
@@ -232,17 +235,26 @@ const SearchPage = (props: Props) => {
                 className="w-[468px] justify-start"
               >
                 {toNameValue
-                  ? toPersonList?.find((person) => person.id === toNameValue)
-                      ?.name
+                  ? (() => {
+                      const res = toPersonList?.find(
+                        (person) => person.id === toNameValue
+                      );
+                      return res ? `${res?.name} ${res?.lname}` : "To Person";
+                    })()
                   : "To Person"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[468px]">
               <Command>
-                <CommandInput
-                  placeholder="To Person"
-                  onChangeCapture={onToNameSearch}
-                />
+                <div className="flex items-center border-b px-3">
+                  <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                  <input
+                    placeholder="Type Name here..."
+                    value={toName}
+                    onChange={(e) => setToName(e.currentTarget.value)}
+                    className="flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-slate-500 disabled:cursor-not-allowed disabled:opacity-50 dark:placeholder:text-slate-400"
+                  />
+                </div>
                 <CommandList>
                   <CommandEmpty>
                     {nameLoading ? "Loading..." : "No Person found."}
@@ -267,7 +279,7 @@ const SearchPage = (props: Props) => {
                               : "opacity-0"
                           )}
                         />
-                        {person.name}
+                        {person.name + " " + person.lname}
                       </CommandItem>
                     ))}
                   </CommandGroup>
