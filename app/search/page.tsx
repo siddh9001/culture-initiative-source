@@ -94,7 +94,7 @@ const SearchPage = (props: Props) => {
   const onClickSearch = async () => {
     try {
       setIsLoading(true);
-      const query = `match p=shortestPath((a:Person {person_id: "${fromNameValue}"})-[*1..10]-(b:Person {person_id: "${toNameValue}"})) RETURN p`;
+      const query = `match p=shortestPath((a:Person {person_id: "${fromNameValue}"})-[*1..10]->(b:Person {person_id: "${toNameValue}"})) RETURN p`;
       // console.log(query);
       const data = await fetchData(query);
 

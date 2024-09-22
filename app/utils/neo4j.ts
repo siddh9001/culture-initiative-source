@@ -83,6 +83,7 @@ export async function CreateRelationship(query: string) {
   }
 }
 
+// ==================================== function to convert neo4j data into cytoscape format ============================================
 export function convertToCytoscapeElements(
   paths: RecordShape[] | undefined
 ): cytoscape.ElementDefinition[] {
