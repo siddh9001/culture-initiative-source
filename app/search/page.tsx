@@ -146,6 +146,7 @@ const SearchPage = (props: Props) => {
           coolingFactor: 0.95,
           minTemp: 1.0,
         },
+        wheelSensitivity: 0.2,
       });
     } catch (error) {
       console.error("Search Click failed: ", error);

@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TbCirclesRelation } from "react-icons/tb";
 import {
@@ -40,6 +39,46 @@ type FromNameType = {
 };
 type Props = {};
 
+const querySelector = (
+  fromPerson: RecordShape | undefined,
+  toPerson: RecordShape | undefined,
+  relationValue: string
+): string => {
+  switch (relationValue) {
+    case "MOTHER_IS" || "FATHER_IS":
+      if (fromPerson?.gender === "M")
+        return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:SON_IS]->(b);`;
+      return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:DAUGHTER_IS]->(b);`;
+    case "BROTHER_IS" || "SISTER_IS":
+      if (fromPerson?.gender === "M")
+        return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:BROTHER_IS]->(b);`;
+      return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:SISTER_IS]->(b);`;
+    case "SON_IS" || "DAUGHTER_IS":
+      if (fromPerson?.gender === "M")
+        return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:FATHER_IS]->(b);`;
+      return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:MOTHER_IS]->(b);`;
+    case "WIFE_IS":
+      return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:HUSBAND_IS]->(b);`;
+    case "HUSBAND_IS":
+      return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:WIFE_IS]->(b);`;
+    case "STEP_SON_IS" || "STEP_DAUGHTER_IS":
+      if (fromPerson?.gender === "M")
+        return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_FATHER_IS]->(b);`;
+      return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_MOTHER_IS]->(b);`;
+    case "STEP_MOTHER_IS" || "STEP_FATHER_IS":
+      if (fromPerson?.gender === "M")
+        return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_SON_IS]->(b);`;
+      return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_DAUGHTER_IS]->(b);`;
+    case "STEP_SISTER_IS" || "STEP_BROTHER_IS":
+      if (fromPerson?.gender === "M")
+        return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_BROTHER_IS]->(b);`;
+      return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_SISTER_IS]->(b);`;
+    default:
+      break;
+  }
+  return "";
+};
+
 const PersonRelationForm = (props: Props) => {
   const { toast } = useToast();
   const [fromPersonList, setFromPersonList] = useState<
@@ -51,8 +90,14 @@ const PersonRelationForm = (props: Props) => {
   const [nameLoading, setNameLoading] = useState<boolean>(false);
   const [fromNameOpen, setFromNameOpen] = useState<boolean>(false);
   const [fromNameValue, setFromNameValue] = useState<string>("");
+  const [currentFromPerson, setCurrentFromPerson] = useState<
+    RecordShape | undefined
+  >();
   const [toNameOpen, setToNameOpen] = useState<boolean>(false);
   const [toNameValue, setToNameValue] = useState<string>("");
+  const [currentToPerson, setCurrentToPerson] = useState<
+    RecordShape | undefined
+  >();
   const [relationValue, setRelationValue] = useState<string>("");
   const [fromName, setFromName] = useState<string>("");
   const [toName, setToName] = useState<string>("");
@@ -73,7 +118,7 @@ const PersonRelationForm = (props: Props) => {
 
   const onFromNameSearch = async (val: string) => {
     const str = val.toLowerCase();
-    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${str}' OR lower(p.person_name) ENDS WITH '${str}' OR lower(p.person_name) CONTAINS '${str}' RETURN p.person_name AS name, p.person_surname as lname, p.person_id AS id`;
+    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${str}' OR lower(p.person_name) ENDS WITH '${str}' OR lower(p.person_name) CONTAINS '${str}' RETURN p.person_name AS name, p.person_surname as lname, p.person_id AS id, p.person_gender AS gender`;
     // const query = `MATCH (p:Person) WHERE p.person_id STARTS WITH '${val}' return p.person_name AS name, p.person_id AS id`;
     try {
       setNameLoading(true);
@@ -90,7 +135,7 @@ const PersonRelationForm = (props: Props) => {
   };
   const onToNameSearch = async (val: string) => {
     const str = val.toLowerCase();
-    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${str}' OR lower(p.person_name) ENDS WITH '${str}' OR lower(p.person_name) CONTAINS '${str}' RETURN p.person_name AS name, p.person_surname as lname, p.person_id AS id`;
+    const query = `MATCH (p:Person) WHERE lower(p.person_name) STARTS WITH '${str}' OR lower(p.person_name) ENDS WITH '${str}' OR lower(p.person_name) CONTAINS '${str}' RETURN p.person_name AS name, p.person_surname as lname, p.person_id AS id, p.person_gender AS gender`;
     try {
       setNameLoading(true);
       if (str !== "" && str.length > 2) {
@@ -105,30 +150,68 @@ const PersonRelationForm = (props: Props) => {
     }
   };
   const onSubmitRelation = async () => {
-    const query = `MATCH (a:Person {person_id: "${fromNameValue}"}) WITH a MATCH (b:Person {person_id: "${toNameValue}"}) MERGE (a)-[:${relationValue}]->(b);`;
+    // Relation from A to B
+    const queryAtoB = `MATCH (a:Person {person_id: "${fromNameValue}"}) WITH a MATCH (b:Person {person_id: "${toNameValue}"}) MERGE (a)-[:${relationValue}]->(b);`;
     try {
       if (fromNameValue !== "" && toNameValue !== "" && relationValue !== "") {
-        await CreateRelationship(query);
+        await CreateRelationship(queryAtoB);
         toast({
           description: "Relation Created Successfully!",
           variant: "success",
         });
+
+        // Relation From B to A.
+        const queryBtoA: string = querySelector(
+          currentFromPerson,
+          currentToPerson,
+          relationValue
+        );
+        try {
+          if (
+            currentFromPerson !== undefined &&
+            currentToPerson !== undefined &&
+            relationValue !== ""
+          ) {
+            await CreateRelationship(queryBtoA);
+            toast({
+              description: "Relation Created Successfully!",
+              variant: "success",
+            });
+          } else {
+            toast({
+              description:
+                "Something went wrong!! `To` to `from` Relationship Failed",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error("`To` to `From` relation submit error:", error);
+          toast({
+            description: "unable to create `To` to `From` relationship",
+            variant: "destructive",
+          });
+        } finally {
+          setCurrentFromPerson(undefined);
+          setCurrentToPerson(undefined);
+          setRelationValue("");
+        }
       } else {
         toast({
-          description: "Something went wrong!!",
+          description:
+            "Something went wrong!! `From` to `To` relationship failed",
           variant: "destructive",
         });
       }
     } catch (error) {
-      console.error("relation submit error:", error);
+      console.error("`From` to `To` relation submit error:", error);
       toast({
-        description: "unable to create relationship",
+        description: "unable to create `From` to `To` relationship",
         variant: "destructive",
       });
     } finally {
       setFromNameValue("");
       setToNameValue("");
-      setRelationValue("");
+      // setRelationValue("");
       setFromPersonList([]);
       setToPersonList([]);
     }
@@ -187,6 +270,7 @@ const PersonRelationForm = (props: Props) => {
                         setFromNameValue(
                           currentValue === fromNameValue ? "" : currentValue
                         );
+                        setCurrentFromPerson(person);
                         setFromNameOpen(false);
                       }}
                     >
@@ -287,6 +371,7 @@ const PersonRelationForm = (props: Props) => {
                         setToNameValue(
                           currentValue === toNameValue ? "" : currentValue
                         );
+                        setCurrentToPerson(person);
                         setToNameOpen(false);
                       }}
                     >
