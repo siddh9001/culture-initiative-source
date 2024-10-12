@@ -45,15 +45,27 @@ const querySelector = (
   relationValue: string
 ): string => {
   switch (relationValue) {
-    case "MOTHER_IS" || "FATHER_IS":
+    case "MOTHER_IS":
       if (fromPerson?.gender === "M")
         return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:SON_IS]->(b);`;
       return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:DAUGHTER_IS]->(b);`;
-    case "BROTHER_IS" || "SISTER_IS":
+    case "FATHER_IS":
+      if (fromPerson?.gender === "M")
+        return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:SON_IS]->(b);`;
+      return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:DAUGHTER_IS]->(b);`;
+    case "BROTHER_IS":
       if (fromPerson?.gender === "M")
         return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:BROTHER_IS]->(b);`;
       return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:SISTER_IS]->(b);`;
-    case "SON_IS" || "DAUGHTER_IS":
+    case "SISTER_IS":
+      if (fromPerson?.gender === "M")
+        return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:BROTHER_IS]->(b);`;
+      return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:SISTER_IS]->(b);`;
+    case "SON_IS":
+      if (fromPerson?.gender === "M")
+        return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:FATHER_IS]->(b);`;
+      return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:MOTHER_IS]->(b);`;
+    case "DAUGHTER_IS":
       if (fromPerson?.gender === "M")
         return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:FATHER_IS]->(b);`;
       return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:MOTHER_IS]->(b);`;
@@ -61,15 +73,27 @@ const querySelector = (
       return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:HUSBAND_IS]->(b);`;
     case "HUSBAND_IS":
       return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:WIFE_IS]->(b);`;
-    case "STEP_SON_IS" || "STEP_DAUGHTER_IS":
+    case "STEP_SON_IS":
       if (fromPerson?.gender === "M")
         return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_FATHER_IS]->(b);`;
       return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_MOTHER_IS]->(b);`;
-    case "STEP_MOTHER_IS" || "STEP_FATHER_IS":
+    case "STEP_DAUGHTER_IS":
+      if (fromPerson?.gender === "M")
+        return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_FATHER_IS]->(b);`;
+      return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_MOTHER_IS]->(b);`;
+    case "STEP_MOTHER_IS":
       if (fromPerson?.gender === "M")
         return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_SON_IS]->(b);`;
       return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_DAUGHTER_IS]->(b);`;
-    case "STEP_SISTER_IS" || "STEP_BROTHER_IS":
+    case "STEP_FATHER_IS":
+      if (fromPerson?.gender === "M")
+        return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_SON_IS]->(b);`;
+      return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_DAUGHTER_IS]->(b);`;
+    case "STEP_SISTER_IS":
+      if (fromPerson?.gender === "M")
+        return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_BROTHER_IS]->(b);`;
+      return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_SISTER_IS]->(b);`;
+    case "STEP_BROTHER_IS":
       if (fromPerson?.gender === "M")
         return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_BROTHER_IS]->(b);`;
       return `MATCH (a:Person {person_id: "${toPerson?.id}"}) WITH a MATCH (b:Person {person_id: "${fromPerson?.id}"}) MERGE (a)-[:STEP_SISTER_IS]->(b);`;

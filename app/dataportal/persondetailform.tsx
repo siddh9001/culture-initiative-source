@@ -16,9 +16,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/hooks/use-toast";
 import { UserRoundPlus } from "lucide-react";
-import { CreatePersonNode } from "../utils/neo4j";
+import { CreateOrUpdatePersonNode } from "../utils/neo4j";
 
 const FormSchema = z.object({
   personname: z.string().min(2, {
@@ -56,6 +56,7 @@ const FormSchema = z.object({
 type Props = {};
 
 const PersonDetailForm = (props: Props) => {
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -74,14 +75,6 @@ const PersonDetailForm = (props: Props) => {
   const { formState, reset } = form;
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     console.log("inside onsubmit:", data);
-    // toast({
-    //   title: "You submitted the following values:",
-    //   description: (
-    //     <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-    //       <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-    //     </pre>
-    //   ),
-    // });
     const new_person_id = crypto.randomUUID().replace(/-/g, "").slice(0, 8);
     const query = `MERGE (p:Person {person_id: '${new_person_id}'})
         SET
@@ -96,7 +89,19 @@ const PersonDetailForm = (props: Props) => {
         p.person_mayka = '${data.personmayka}', 
         p.person_marrige_status = '${data.personmarrigestatus}', 
         p.created_at = timestamp()`;
-    await CreatePersonNode(query);
+    try {
+      await CreateOrUpdatePersonNode(query);
+      toast({
+        description: "Relation Updated Successfully!",
+        variant: "success",
+      });
+    } catch (error) {
+      console.error("person update detail error:", error);
+      toast({
+        description: "unable to update relationship",
+        variant: "destructive",
+      });
+    }
   }
 
   useEffect(() => {

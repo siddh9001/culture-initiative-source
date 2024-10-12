@@ -44,7 +44,7 @@ export async function fetchNames(query: string) {
 }
 
 // ==================================== function to create a person node ============================================
-export async function CreatePersonNode(query: string) {
+export async function CreateOrUpdatePersonNode(query: string) {
   const driver = neo4j.driver(
     neo4jUri,
     neo4j.auth.basic(neo4jUser, neo4jPassword)
