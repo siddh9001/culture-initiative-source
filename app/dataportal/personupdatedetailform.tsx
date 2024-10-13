@@ -117,11 +117,25 @@ const PersonUpdateDetailForm = (props: Props) => {
         p.person_marrige_status = '${data.personmarrigestatus}',
         p.updated_at = timestamp()`;
     try {
-      await CreateOrUpdatePersonNode(query);
-      toast({
-        description: "Relation Updated Successfully!",
-        variant: "success",
-      });
+      if (
+        fromNameValue !== "" &&
+        data.personname !== "" &&
+        data.personsurname !== "" &&
+        data.personmodifiedname !== "" &&
+        data.persongender !== "" &&
+        data.persondob !== "" &&
+        data.personlocation !== "" &&
+        data.personDAstatus !== "" &&
+        data.personsasuraal !== "" &&
+        data.personmayka !== "" &&
+        data.personmarrigestatus !== ""
+      ) {
+        await CreateOrUpdatePersonNode(query);
+        toast({
+          description: "Relation Updated Successfully!",
+          variant: "success",
+        });
+      }
     } catch (error) {
       console.error("person update detail error:", error);
       toast({
@@ -132,9 +146,23 @@ const PersonUpdateDetailForm = (props: Props) => {
   }
 
   useEffect(() => {
-    // console.log("formstate: ", formState.isSubmitSuccessful);
+    console.log("formstate: ", formState.isSubmitSuccessful);
     if (formState.isSubmitSuccessful) {
-      reset();
+      reset({
+        personname: "",
+        personsurname: "",
+        personmodifiedname: "",
+        persongender: "",
+        persondob: "",
+        personDAstatus: "",
+        personlocation: "",
+        personmayka: "",
+        personsasuraal: "",
+        personmarrigestatus: "",
+      });
+      setFromNameValue("");
+      setFromPersonList([]);
+      setFromName("");
     }
   }, [formState, reset]);
 

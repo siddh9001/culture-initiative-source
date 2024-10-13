@@ -90,11 +90,24 @@ const PersonDetailForm = (props: Props) => {
         p.person_marrige_status = '${data.personmarrigestatus}', 
         p.created_at = timestamp()`;
     try {
-      await CreateOrUpdatePersonNode(query);
-      toast({
-        description: "Relation Updated Successfully!",
-        variant: "success",
-      });
+      if (
+        data.personname !== "" &&
+        data.personsurname !== "" &&
+        data.personmodifiedname !== "" &&
+        data.persongender !== "" &&
+        data.persondob !== "" &&
+        data.personlocation !== "" &&
+        data.personDAstatus !== "" &&
+        data.personsasuraal !== "" &&
+        data.personmayka !== "" &&
+        data.personmarrigestatus !== ""
+      ) {
+        await CreateOrUpdatePersonNode(query);
+        toast({
+          description: "Relation Updated Successfully!",
+          variant: "success",
+        });
+      }
     } catch (error) {
       console.error("person update detail error:", error);
       toast({
