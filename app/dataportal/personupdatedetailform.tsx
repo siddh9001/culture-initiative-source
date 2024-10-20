@@ -146,7 +146,7 @@ const PersonUpdateDetailForm = (props: Props) => {
   }
 
   useEffect(() => {
-    console.log("formstate: ", formState.isSubmitSuccessful);
+    // console.log("formstate: ", formState.isSubmitSuccessful);
     if (formState.isSubmitSuccessful) {
       reset({
         personname: "",
@@ -199,12 +199,7 @@ const PersonUpdateDetailForm = (props: Props) => {
       if (data != undefined) {
         console.log(
           "user dob: ",
-          data[0].persondob
-            ?.toString()
-            .slice(0, 10)
-            .split("-")
-            .reverse()
-            .join("/")
+          data[0].persondob?.toString().slice(0, 10).split("-").join("/")
         );
         reset({
           personname: data[0].personname,
@@ -215,7 +210,6 @@ const PersonUpdateDetailForm = (props: Props) => {
             .toString()
             .slice(0, 10)
             .split("-")
-            .reverse()
             .join("/"),
           personDAstatus: data[0].personDAstatus,
           personlocation: data[0].personlocation,
@@ -326,9 +320,7 @@ const PersonUpdateDetailForm = (props: Props) => {
                 <FormControl>
                   <Input placeholder="Enter Name" {...field} />
                 </FormControl>
-                <FormDescription>
-                  This is your public display name.
-                </FormDescription>
+                <FormDescription>व्यक्ति का नाम</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -342,9 +334,7 @@ const PersonUpdateDetailForm = (props: Props) => {
                 <FormControl>
                   <Input placeholder="Enter Surname" {...field} />
                 </FormControl>
-                <FormDescription>
-                  This is your public display name.
-                </FormDescription>
+                <FormDescription>व्यक्ति का उपनाम</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -359,7 +349,7 @@ const PersonUpdateDetailForm = (props: Props) => {
                   <Input placeholder="Enter Modified Name" {...field} />
                 </FormControl>
                 <FormDescription>
-                  This is your public display name.
+                  व्यक्ति का बदला हुआ नाम । ना होने पर NA भरें
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -375,7 +365,7 @@ const PersonUpdateDetailForm = (props: Props) => {
                   <Input placeholder="M(Male)/F(Female)" {...field} />
                 </FormControl>
                 <FormDescription>
-                  This is your public display name.
+                  व्यक्ति का लिंग। केवल M/F भरें
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -391,7 +381,7 @@ const PersonUpdateDetailForm = (props: Props) => {
                   <Input placeholder="ex. mm/dd/yyyy" {...field} />
                 </FormControl>
                 <FormDescription>
-                  This is your public display name.
+                  व्यक्ति की जन्मतारिख । ना होने पर NA भरें
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -406,9 +396,7 @@ const PersonUpdateDetailForm = (props: Props) => {
                 <FormControl>
                   <Input placeholder="D(Dead)/A(Alive)" {...field} />
                 </FormControl>
-                <FormDescription>
-                  This is your public display name.
-                </FormDescription>
+                <FormDescription>जीवित या मृत । केवल D/A भरें</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -423,7 +411,7 @@ const PersonUpdateDetailForm = (props: Props) => {
                   <Input placeholder="ex. Balaghat" {...field} />
                 </FormControl>
                 <FormDescription>
-                  Enter a city, village, town etc. name.
+                  व्यक्ति का वर्तमान निवासस्थान ।
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -439,7 +427,8 @@ const PersonUpdateDetailForm = (props: Props) => {
                   <Input placeholder="ex. Chichgaon" {...field} />
                 </FormControl>
                 <FormDescription>
-                  Enter a city, village, town etc. name.
+                  व्यक्ति का मायका । एक से ज्यादा होने पर , देकर भरें । ना होने
+                  पर NA भरें
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -455,7 +444,8 @@ const PersonUpdateDetailForm = (props: Props) => {
                   <Input placeholder="ex. Ankhiwada" {...field} />
                 </FormControl>
                 <FormDescription>
-                  Enter a city, village, town etc. name.
+                  व्यक्ति का ससुराल । एक से ज्यादा होने पर , देकर भरें । ना होने
+                  पर NA भरें
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -473,7 +463,9 @@ const PersonUpdateDetailForm = (props: Props) => {
                     {...field}
                   />
                 </FormControl>
-                <FormDescription>What is marriage status.</FormDescription>
+                <FormDescription>
+                  विवाहित या अविवाहित । केवल MRD/UMD भरें
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
