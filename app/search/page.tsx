@@ -159,7 +159,7 @@ const SearchPage = (props: Props) => {
 
   return (
     <div className="min-h-screen w-full bg-slate-900">
-      <div className="w-full bg-slate-700 px-8 py-6 flex justify-evenly gap-4">
+      <div className="w-full bg-slate-700 px-8 py-6 flex max-md:flex-col justify-evenly gap-4">
         <div>
           <Popover open={fromNameOpen} onOpenChange={setFromNameOpen}>
             <PopoverTrigger asChild>
@@ -167,7 +167,7 @@ const SearchPage = (props: Props) => {
                 variant="outline"
                 role="combobox"
                 aria-expanded={fromNameOpen}
-                className="w-[468px] justify-start text-black"
+                className="w-[468px] max-md:w-full justify-start text-black"
               >
                 {fromNameValue
                   ? (() => {
@@ -179,7 +179,7 @@ const SearchPage = (props: Props) => {
                   : "From Person"}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[468px]">
+            <PopoverContent className="w-[468px] max-md:w-full">
               <Command>
                 <div className="flex items-center border-b px-3">
                   <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
@@ -223,7 +223,7 @@ const SearchPage = (props: Props) => {
             </PopoverContent>
           </Popover>
         </div>
-        <div className="h-10 flex flex-col justify-center">
+        <div className="h-10 flex flex-col justify-center max-md:hidden">
           <TbCirclesRelation size={32} color="white" />
         </div>
         <div>
@@ -233,7 +233,7 @@ const SearchPage = (props: Props) => {
                 variant="outline"
                 role="combobox"
                 aria-expanded={toNameOpen}
-                className="w-[468px] justify-start"
+                className="w-[468px] max-md:w-full justify-start"
               >
                 {toNameValue
                   ? (() => {
@@ -301,7 +301,7 @@ const SearchPage = (props: Props) => {
         <div
           id="graph01"
           ref={containerRef}
-          style={{ height: "800px", width: "1200px" }}
+          style={{ height: "800px", width: "100%" }}
         ></div>
       </div>
     </div>
